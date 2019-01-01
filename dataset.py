@@ -56,7 +56,3 @@ def test(line_path, color_path, size=(512, 512)):
     plt.figure()
     plt.imshow(np.asarray(color))
     plt.show()
-
-
-if __name__ == '__main__':
-    test('D:/ImageDatas/Line/l_248839.jpg', 'D:/ImageDatas/Color/color_248839.jpg')

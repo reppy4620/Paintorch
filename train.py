@@ -86,8 +86,9 @@ def train(epoch):
         pred_fake = netD(fake)
 
         loss_g_gan = criterionGAN(pred_fake, real_label)
-        loss_g_l1 = criterionL1(fake, color) * 10
-        loss_g = loss_g_gan + loss_g_l1
+        loss_g_l1 = criterionL1(fake, color)
+        loss_g_mse = criterionMSE(fake, color)
+        loss_g = loss_g_gan + (loss_g_l1 + loss_g_mse) * 5
 
         loss_g.backward()
         optG.step()

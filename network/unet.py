@@ -6,20 +6,14 @@ from .norm_type import NormType
 from .utils import weights_init
 
 
-def define_U(in_channel=1, out_channel=3, norm=NormType.Group):
+def define_U(in_channel=1, out_channel=3, norm=NormType.Batch):
     u = UNet(in_channel=in_channel, out_channel=out_channel, norm=norm)
     u.apply(weights_init)
     return u
 
 
-def define_double_U(in_channel=1, out_channel=3):
-    us = [UNet(in_channel, out_channel), UNet(out_channel, out_channel)]
-    [u.apply(weights_init) for u in us]
-    return nn.Sequential(*us)
-
-
 class Down(nn.Module):
-    def __init__(self, in_nc, out_nc, ks, s, p, leaky=True, norm=NormType.Group, n_group=32):
+    def __init__(self, in_nc, out_nc, ks, s, p, leaky=False, norm=NormType.Batch, n_group=32):
         super(Down, self).__init__()
         if norm == NormType.Instance:
             norm_layer = nn.InstanceNorm2d(out_nc)
@@ -37,21 +31,21 @@ class Down(nn.Module):
         return self.layer(x)
 
 
-def InConv(img_nc, out_nc, leaky=True, norm=NormType.Group):
+def InConv(img_nc, out_nc, leaky=False, norm=NormType.Batch):
     return Down(img_nc, out_nc, 3, 1, 1, leaky, norm=norm, n_group=1)
 
 
-def Down3x3(nc, leaky=True, norm=NormType.Group):
+def Down3x3(nc, leaky=False, norm=NormType.Batch):
     return Down(nc, nc, 3, 1, 1, leaky, norm=norm, n_group=32)
 
 
-def Down4x4(in_nc, out_nc, leaky=True, norm=NormType.Group):
+def Down4x4(in_nc, out_nc, leaky=False, norm=NormType.Batch):
     return Down(in_nc, out_nc, 4, 2, 1, leaky, norm=norm, n_group=32)
 
 
 class Up(nn.Module):
     def __init__(self, nc, ks1=4, ks2=3,
-                 s1=2, s2=1, p1=1, p2=1, norm=NormType.Group, n_group=32):
+                 s1=2, s2=1, p1=1, p2=1, norm=NormType.Batch, n_group=32):
         super(Up, self).__init__()
 
         if norm == NormType.Instance:
@@ -66,12 +60,12 @@ class Up(nn.Module):
         else:
             raise ValueError("Cannot solve the normalization layer type")
         self.layer1 = nn.Sequential(
-            nn.ConvTranspose2d(nc, nc//2, ks1, s1, p1),
+            nn.ConvTranspose2d(nc, int(nc / 2), ks1, s1, p1),
             norm_layer1,
             nn.ReLU(inplace=True)
         )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(nc//2, nc//4, ks2, s2, p2),
+            nn.Conv2d(int(nc/2), int(nc/4), ks2, s2, p2),
             norm_layer2,
             nn.ReLU(inplace=True)
         )
@@ -87,9 +81,19 @@ class Up(nn.Module):
 
 class Out(nn.Module):
 
-    def __init__(self, in_nc, out_nc, ks=3, s=1, p=1, norm=NormType.Group):
+    def __init__(self, in_nc, out_nc, ks=3, s=1, p=1, norm=NormType.Batch):
         super(Out, self).__init__()
-        self.down = Down(in_nc, out_nc, ks, s, p, leaky=False, norm=norm, n_group=1)
+        if norm == NormType.Instance:
+            norm_layer = nn.InstanceNorm2d(out_nc)
+        elif norm == NormType.Group:
+            norm_layer = nn.GroupNorm(32, out_nc)
+        else:
+            norm_layer = nn.BatchNorm2d(out_nc)
+        self.down = nn.Sequential(
+            nn.Conv2d(in_nc, out_nc, ks, s, p),
+            norm_layer,
+            nn.Tanh()
+        )
 
     def forward(self, x1, x2):
         diff_y = x2.size()[2] - x1.size()[2]
@@ -101,10 +105,10 @@ class Out(nn.Module):
 
 class UNet(nn.Module):
 
-    def __init__(self, in_channel=1, out_channel=3, ngf=32, norm=NormType.Group):
+    def __init__(self, in_channel=1, out_channel=3, ngf=32, norm=NormType.Batch):
         super(UNet, self).__init__()
         leaky = False
-        self.in_layer = InConv(in_channel, ngf, norm=norm)
+        self.in_layer = InConv(in_channel, ngf, leaky, norm=norm)
         self.down1 = Down4x4(ngf, ngf*2, leaky, norm)
         self.down2 = Down3x3(ngf*2, leaky, norm)
         self.down3 = Down4x4(ngf*2, ngf*4, leaky, norm)
