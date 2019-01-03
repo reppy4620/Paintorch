@@ -6,11 +6,15 @@ PainTorch is affected by PaintsChainer.
 
 # Result
 Training for 2 epochs result.  
-It may be subtle...  
+
+- left : Line art
+- center : Original art
+- right : Result
   
 ![result.jpg](https://github.com/reppy4620/PainTorch/blob/master/imgs/result.jpg)  
+from [かがちさく様] https://www.pixiv.net/member_illust.php?mode=medium&illust_id=72418691  
   
-![result2.jpg](https://github.com/reppy4620/PainTorch/blob/master/imgs/result2.jpg)
-
+![result2.jpg](https://github.com/reppy4620/PainTorch/blob/master/imgs/result2.jpg)  
+from [nyanya様] https://www.pixiv.net/member_illust.php?mode=medium&illust_id=72431832  
 ## Attention
 Sorry for not corresponding to command line args but you can setting in config.py.
