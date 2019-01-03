@@ -8,7 +8,6 @@ PainTorch is affected by PaintsChainer.
 Training for 2 epochs result.  
 
 - left : Line art
-- center : Original art
 - right : Result
   
 ![result.jpg](https://github.com/reppy4620/PainTorch/blob/master/imgs/result.jpg)  
