@@ -21,8 +21,8 @@ def change2line(in_root, out_root):
             img_diff_not = cv2.bitwise_not(img_diff)
             cv2.imwrite(os.path.join(out_root, f'l_{i}.jpg'), img_diff_not)
         except:
-            # if error move image
-            shutil.move(path, 'path/to/img_dir')
+            # if error
+            shutil.move(path, 'path/to/err_img_dir')
     if not os.path.isdir(out_root):
         os.mkdir(out_root)
     length = len(os.listdir(in_root))

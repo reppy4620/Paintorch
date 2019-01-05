@@ -28,8 +28,8 @@ loader = get_train_loader(CFG.line_path,
                           CFG.batch_size, resize=True, size=(512, 512))
 
 print('Define Network')
-netG = define_U(in_channel=1, out_channel=3, norm=CFG.norm_type).to(device)
-netD = define_D(3, norm=CFG.norm_type).to(device)
+netG = define_U(device, in_channel=1, out_channel=3).to(device)
+netD = define_D(device, 3).to(device)
 
 print('Define Optimizer')
 optG = optim.Adam(netG.parameters(), lr=CFG.lr, betas=CFG.betas)

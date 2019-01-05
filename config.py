@@ -1,9 +1,6 @@
-from network.norm_type import NormType
-
-
 class CFG:
     is_load_model = False
-    cuda = False
+    cuda = True
 
     start_epoch = 1
     num_epoch = 100
@@ -11,7 +8,6 @@ class CFG:
 
     lr = 2e-3
     betas = (0.5, 0.99)
-    norm_type = NormType.Batch
 
     loss_span = 100
     save_result_span = 100
