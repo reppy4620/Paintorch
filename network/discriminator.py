@@ -28,7 +28,7 @@ class Discriminator(nn.Module):
         self.in_layer = Down(input_nc, ndf, 4, 2, 1)
         layers = list()
         for _ in range(n_layers):
-            self.layers += [
+            layers += [
                 Down(ndf, ndf, 3, 1, 1),
                 Down(ndf, ndf * 2, 4, 2, 1),
             ]
