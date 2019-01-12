@@ -12,6 +12,3 @@ Training for 3 epochs result.
   
 ![result.jpg](https://github.com/reppy4620/PainTorch/blob/master/imgs/result.jpg)  
 from [かがちさく様] https://www.pixiv.net/member_illust.php?mode=medium&illust_id=72418691  
-  
-### Attention
-Sorry for not corresponding to command line args but you can setting in config.py.
