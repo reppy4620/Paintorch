@@ -68,6 +68,7 @@ def image_filter(root, mode='move', with_size_filter=False, size=(512, 512), thr
 
 
 if __name__ == '__main__':
+    # FIXME fix root
     image_filter(root='path/to/ColorArtFolder',
                  mode='move',
                  with_size_filter=True,

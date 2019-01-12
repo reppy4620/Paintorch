@@ -23,8 +23,7 @@ for path in [CFG.result_dir, CFG.model_dir]:
         os.mkdir(path)
 
 print('Setup ImageLoader')
-loader = get_train_loader(CFG.line_path,
-                          CFG.color_path,
+loader = get_train_loader(CFG.color_path,
                           CFG.batch_size, resize=True, size=(512, 512))
 
 print('Define Network')
@@ -88,7 +87,7 @@ def train(epoch):
         loss_g_gan = criterionGAN(pred_fake, real_label)
         loss_g_l1 = criterionL1(fake, color)
         loss_g_mse = criterionMSE(fake, color)
-        loss_g = loss_g_gan + (loss_g_l1 + loss_g_mse) * 5
+        loss_g = loss_g_gan + (loss_g_l1 + loss_g_mse) * 10
 
         loss_g.backward()
         optG.step()

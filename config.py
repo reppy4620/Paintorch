@@ -17,7 +17,6 @@ class CFG:
     result_dir = 'path/to/result_dir'
     model_dir = 'path/to/model_dir'
 
-    line_path = 'path/to/line_art_dir'
     color_path = 'path/to/color_art_dir'
 
     model_name = 'best.pth'
