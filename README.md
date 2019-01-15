@@ -6,6 +6,7 @@ PainTorch is affected by PaintsChainer.
 
 # Result
 Training for 3 epochs result.  
+This image is not used training.  
 
 - left : Line art
 - right : Result
