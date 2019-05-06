@@ -4,10 +4,6 @@ Simple Implementation of changing line art to color art like PaintsChainer.
 To implement this, i used Image2Image algorithms.  
 PainTorch is affected by PaintsChainer.
 
-## Data
-I stop publishing if there is a problem.
-https://drive.google.com/open?id=13Ogk9LjrTBY8adxuDNSFqmNw36Pm5Ylr
-
 # Result
 This image is not used training.  
 
