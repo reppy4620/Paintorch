@@ -9,14 +9,13 @@ class CFG:
     lr = 2e-3
     betas = (0.5, 0.99)
 
-    loss_span = 100
     save_result_span = 100
     save_model_span = 100
 
     # FIXME change path
-    result_dir = 'path/to/result_dir'
-    model_dir = 'path/to/model_dir'
+    result_dir = 'D:/result_path'
+    model_dir = 'D:/model_path'
 
-    color_path = 'path/to/color_art_dir'
+    color_path = 'D:/ImageDatas/color_path'
 
     model_name = 'best.pth'

@@ -1,5 +1,5 @@
-import os
 import cv2
+import glob
 import random
 import numpy as np
 import torchvision.transforms as T
@@ -36,10 +36,10 @@ class TwoImgRandomCrop(T.RandomCrop):
 class LineColorDataset(Dataset):
 
     def __init__(self, color_path, resize=True, size=(512, 512)):
-        self.color_path = color_path
-        self.colors = os.listdir(color_path)
+        self.colors = glob.glob(f'{color_path}/*')
         self.random_crop = TwoImgRandomCrop(size) if resize else None
         self.normal_crop = T.Resize(size)
+        self.to_tensor = T.ToTensor()
         self.transforms = T.Compose([
             T.ToTensor(),
             T.Normalize((0.5, 0.5, 0.5),
@@ -47,8 +47,7 @@ class LineColorDataset(Dataset):
         ])
 
     def __getitem__(self, index):
-        color_img = Image.open(os.path.join(self.color_path,
-                                            self.colors[index])).convert('RGB')
+        color_img = Image.open(self.colors[index]).convert('RGB')
         line_img = color_to_line(np.asarray(color_img))
         if self.random_crop is not None:
             if random.random() > THRESHOLD:
@@ -56,7 +55,7 @@ class LineColorDataset(Dataset):
                 color_img = self.normal_crop(color_img)
             else:
                 line_img, color_img = self.random_crop(line_img, color_img)
-        return self.transforms(line_img), self.transforms(color_img)
+        return self.to_tensor(line_img), self.transforms(color_img)
 
     def __len__(self):
         return len(self.colors)

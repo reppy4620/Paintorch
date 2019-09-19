@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import torchvision.utils as vutils
+from tqdm import tqdm
 
 from network import define_D, GanLoss, define_U
 from dataloader import get_train_loader
@@ -13,10 +14,10 @@ from config import CFG
 cudnn.benchmark = True
 
 torch.manual_seed(123)
-if torch.cuda.is_available():
+if CFG.cuda:
     torch.cuda.manual_seed(123)
 
-device = torch.device('cuda') if CFG.cuda else torch.device('cpu')
+device = torch.device('cuda' if CFG.cuda else 'cpu')
 
 for path in [CFG.result_dir, CFG.model_dir]:
     if not os.path.isdir(path):
@@ -56,63 +57,63 @@ real_label = 1
 
 
 def train(epoch):
-    for i, (line, color) in enumerate(loader, 1):
-        line = line.to(device)
-        color = color.to(device)
+    with tqdm(total=len(loader), desc=f'Epoch: {epoch}') as pbar:
+        for i, (line, color) in enumerate(loader, 1):
+            line = line.to(device)
+            color = color.to(device)
 
-        fake = netG(line)
+            fake = netG(line)
 
-        ####################
-        # Update D Network #
-        ####################
-        optD.zero_grad()
-        # Fake
-        pred_fake = netD(fake.detach())
-        loss_d_fake = criterionGAN(pred_fake, fake_label)
+            ####################
+            # Update D Network #
+            ####################
+            optD.zero_grad()
+            # Fake
+            pred_fake = netD(fake.detach())
+            loss_d_fake = criterionGAN(pred_fake, fake_label)
 
-        # Real
-        pred_real = netD(color)
-        loss_d_real = criterionGAN(pred_real, real_label)
+            # Real
+            pred_real = netD(color)
+            loss_d_real = criterionGAN(pred_real, real_label)
 
-        loss_d = (loss_d_fake + loss_d_real) * 0.5
-        loss_d.backward()
-        optD.step()
+            loss_d = (loss_d_fake + loss_d_real) * 0.5
+            loss_d.backward()
+            optD.step()
 
-        ###################
-        # UpdateG Network #
-        ###################
-        optG.zero_grad()
-        pred_fake = netD(fake)
+            ###################
+            # UpdateG Network #
+            ###################
+            optG.zero_grad()
+            pred_fake = netD(fake)
 
-        loss_g_gan = criterionGAN(pred_fake, real_label)
-        loss_g_l1 = criterionL1(fake, color)
-        loss_g_mse = criterionMSE(fake, color)
-        loss_g = loss_g_gan + (loss_g_l1 + loss_g_mse) * 10
+            loss_g_gan = criterionGAN(pred_fake, real_label)
+            loss_g_l1 = criterionL1(fake, color)
+            loss_g_mse = criterionMSE(fake, color)
+            loss_g = loss_g_gan + (loss_g_l1 + loss_g_mse) * 10
 
-        loss_g.backward()
-        optG.step()
+            loss_g.backward()
+            optG.step()
 
-        if i % CFG.loss_span == 0:
-            print(f'Epoch: {epoch}, Ep.{i},'
-                  f' Loss_D: {loss_d.item():.5f},'
-                  f' LossG: {loss_g.item():.5f}')
+            if i % CFG.save_result_span == 0:
+                vutils.save_image(
+                    torch.cat([color, fake]),
+                    os.path.join(CFG.result_dir, f'{epoch}_{i}.jpg'),
+                    normalize=True,
+                    nrow=8
+                )
 
-        if i % CFG.save_result_span == 0:
-            vutils.save_image(
-                torch.cat([color, fake]),
-                os.path.join(CFG.result_dir, f'{epoch}_{i}.jpg'),
-                normalize=True,
-                nrow=4
-            )
+            if i % CFG.save_model_span == 0:
+                torch.save({
+                    'epoch': epoch,
+                    'netG': netG.state_dict(),
+                    'netD': netD.state_dict(),
+                    'optG': optG.state_dict(),
+                    'optD': optD.state_dict()
+                }, os.path.join(CFG.model_dir, CFG.model_name))
 
-        if i % CFG.save_model_span == 0:
-            torch.save({
-                'epoch': epoch,
-                'netG': netG.state_dict(),
-                'netD': netD.state_dict(),
-                'optG': optG.state_dict(),
-                'optD': optD.state_dict()
-            }, os.path.join(CFG.model_dir, CFG.model_name))
+            pbar.update(1)
+            pbar.set_postfix_str(f'Loss_D: {loss_d.item():.5f},'
+                                 f' Loss_G: {loss_g.item():.5f}')
 
 
 if __name__ == '__main__':
